@@ -3,7 +3,9 @@ package main
 import (
 	"net/http"
 
-	"github.com/byuoitav/qsys-download/handlers/endpoints"
+	"fmt"
+
+	"github.com/byuoitav/qsys-download/endpoints"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/pflag"
 )
@@ -13,6 +15,7 @@ func main() {
 	pflag.StringVarP(&port, "port", "p", "8013", "port for microservice to av-api communication")
 	pflag.StringVarP(&logLevel, "log", "l", "Info", "Initial log level")
 	pflag.Parse()
+	fmt.Println(port, logLevel)
 
 	port = ":" + port
 
