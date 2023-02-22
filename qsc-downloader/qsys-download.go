@@ -1,4 +1,4 @@
-package qsys-download
+package qsysdownload
 
 import (
 	"fmt"
@@ -36,5 +36,3 @@ func downloadFile(filepath string, url string) (err error) {
 
 	return nil
 }
-
-

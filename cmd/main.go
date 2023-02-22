@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/byuoitav/qsys-download/endpoints"
+	"github.com/byuoitav/qsys-download/handlers/endpoints"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/pflag"
 )
