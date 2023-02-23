@@ -12,12 +12,19 @@ type DeviceManager struct {
 	Log *zap.Logger
 }
 
+//Info needed for upload:
+//BOX API key - store as env or file
+//BOX Folder ID - store as env or file
+//File Name for BOX - get from QSC
+//Q-Sys File Name and path - get from QSC
+//Q-Sys Core IP Address - get from QSC
+
 func (d *DeviceManager) RunHTTPServer(router *gin.Engine, port string) error {
 	d.Log.Info("registering http endpoints")
 
 	// action endpoints
 	route := router.Group("/api/v1")
-	route.GET("/:address/download/:file", d.downloadFile)
+	route.PUT("/:address/download/:file", d.downloadFile)
 
 	// status endpoints
 	route.GET("/:address/download-status/:file", d.getDownloadStatus)
