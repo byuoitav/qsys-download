@@ -27,7 +27,7 @@ func (d *DeviceManager) RunHTTPServer(router *gin.Engine, port string) error {
 	route.PUT("/:address/download/:file", d.downloadFile)
 
 	// status endpoints
-	route.GET("/:address/download-status/:file", d.getDownloadStatus)
+	route.GET("/:address/download-status/", d.getDownloadStatus)
 
 	server := &http.Server{
 		Addr:           port,

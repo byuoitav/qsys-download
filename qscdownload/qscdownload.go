@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func downloadFile(filepath string, url string) (err error) {
+func DownloadFile(filepath string, url string) (err error) {
 
 	// Create the file
 	out, err := os.Create(filepath)

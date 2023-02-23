@@ -36,23 +36,35 @@ func (d *DeviceManager) getBoxFolderID(context *gin.Context) (id string) {
 
 func (d *DeviceManager) downloadFile(context *gin.Context) {
 	fmt.Println("downloadFile Top")
-	d.Log.Debug("downloading file", zap.String("file", context.Param("file")), zap.String("address", context.Param("address")))
 
-	power := context.Param("file")
-	address := context.Param("address")
-	fmt.Println(power, address)
-	fmt.Println((context.Query("key")))          //This is how to get keys in the URL after the ?
-	fmt.Println((context.PostForm("form data"))) //This is how to get keys as form data
+	filename := context.Param("file")
+	downloadfilepath := context.PostForm("filePath")
+	storefilepath := "../tmp_audio/" + filename
+
+	coreIP := context.Param("address")
+
+	if filename == "" || downloadfilepath == "" || coreIP == "" {
+		context.String(http.StatusOK, "Malformed query. URL should match https://api/v1/core IP address/download/file name.mp3. filePath should be defined in form data as well.")
+	}
+
+	url := coreIP + "/api/v0/cores/self/media/" + downloadfilepath
+
+	d.Log.Debug("downloading file", zap.String("Storing file: ", storefilepath), zap.String("Core address: ", coreIP), zap.String("Download url: ", url))
+	fmt.Println(storefilepath, url)
+
+	qsc.DownloadFile(storefilepath, url)
+
+	//fmt.Println((context.Query("key")))          //This is how to get keys in the URL after the ?
+	//fmt.Println((context.PostForm("form data"))) //This is how to get keys as form data
 
 	//context.String(http.StatusOK, "Some String")
 
-	filename := "DefLeppardPourSomeSugarOnMelyrics.mp3"
-	filepath := "tmp_audio/" + filename
+	// filename := "DefLeppardPourSomeSugarOnMelyrics.mp3"
+	// filepath := "../tmp_audio/" + filename
 
-	coreIP := "10.5.34.167"
-	url := coreIP + "/api/v0/cores/self/media/Audio/" + filename
+	// coreIP := "10.5.34.167"
+	// url := coreIP + "/api/v0/cores/self/media/Audio/" + filename
 
-	qsc.DownloadFile(filepath, url)
 	// if err != nil {
 	// 	d.Log.Warn("could not download file", zap.Error(err))
 	// 	context.JSON(http.StatusInternalServerError, err.Error())
@@ -66,7 +78,7 @@ func (d *DeviceManager) downloadFile(context *gin.Context) {
 	// 	return
 	//}
 
-	d.Log.Debug("successfully set power", zap.String("power", context.Param("power")), zap.String("address", context.Param("address")))
+	//d.Log.Debug("successfully set power", zap.String("power", context.Param("power")), zap.String("address", context.Param("address")))
 	context.JSON(http.StatusOK, 1)
 }
 
