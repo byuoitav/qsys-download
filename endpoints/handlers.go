@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	qsc "github.com/byuoitav/qsc-download/qscdownload"
+	qsc "github.com/byuoitav/qscdownload/qscdownload"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
