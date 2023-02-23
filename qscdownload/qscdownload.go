@@ -1,4 +1,4 @@
-package qsysdownload
+package qscdownload
 
 import (
 	"fmt"
