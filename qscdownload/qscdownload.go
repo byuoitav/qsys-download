@@ -8,6 +8,7 @@ import (
 )
 
 func DownloadFile(filepath string, url string) (err error) {
+	//Todo: Check for file path folder exists and create it if not on system
 
 	// Create the file
 	out, err := os.Create(filepath)

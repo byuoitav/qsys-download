@@ -44,7 +44,7 @@ func (d *DeviceManager) downloadFile(context *gin.Context) {
 	coreIP := context.Param("address")
 
 	if filename == "" || downloadfilepath == "" || coreIP == "" {
-		context.String(http.StatusOK, "Malformed query. URL should match https://api/v1/core IP address/download/file name.mp3. filePath should be defined in form data as well.")
+		context.String(http.StatusOK, "Malformed query. URL should match https://api/v1/core IP address/download/file name.mp3. FilePath must be defined in form data as well.")
 	}
 
 	url := coreIP + "/api/v0/cores/self/media/" + downloadfilepath
@@ -52,33 +52,13 @@ func (d *DeviceManager) downloadFile(context *gin.Context) {
 	d.Log.Debug("downloading file", zap.String("Storing file: ", storefilepath), zap.String("Core address: ", coreIP), zap.String("Download url: ", url))
 	fmt.Println(storefilepath, url)
 
-	qsc.DownloadFile(storefilepath, url)
+	err := qsc.DownloadFile(storefilepath, url)
+	if err != nil {
+		d.Log.Warn("could not download file", zap.Error(err))
+		context.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	//fmt.Println((context.Query("key")))          //This is how to get keys in the URL after the ?
-	//fmt.Println((context.PostForm("form data"))) //This is how to get keys as form data
-
-	//context.String(http.StatusOK, "Some String")
-
-	// filename := "DefLeppardPourSomeSugarOnMelyrics.mp3"
-	// filepath := "../tmp_audio/" + filename
-
-	// coreIP := "10.5.34.167"
-	// url := coreIP + "/api/v0/cores/self/media/Audio/" + filename
-
-	// if err != nil {
-	// 	d.Log.Warn("could not download file", zap.Error(err))
-	// 	context.JSON(http.StatusInternalServerError, err.Error())
-	// 	return
-	// }
-
-	// err := actions.SetPower(context, context.Param("address"), power)
-	// if err != nil {
-	// 	d.Log.Warn("failed to set power", zap.Error(err))
-	// 	context.JSON(http.StatusInternalServerError, err.Error())
-	// 	return
-	//}
-
-	//d.Log.Debug("successfully set power", zap.String("power", context.Param("power")), zap.String("address", context.Param("address")))
 	context.JSON(http.StatusOK, 1)
 }
 
