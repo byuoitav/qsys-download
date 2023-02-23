@@ -7,33 +7,33 @@ import (
 	"os"
 )
 
-func DownloadFile(filepath string, url string) (err error) {
+func DownloadFile(filepath string, url string) (size int64, err error) {
 	//Todo: Check for file path folder exists and create it if not on system
+	fmt.Println(filepath, url)
+	// Get the data
+	resp, err := http.Get(url)
+	if err != nil {
+		return 0, err
+	}
+	defer resp.Body.Close()
 
 	// Create the file
 	out, err := os.Create(filepath)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer out.Close()
 
-	// Get the data
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
 	// Check server response
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("bad status: %s", resp.Status)
+		return 0, fmt.Errorf("bad status: %s", resp.Status)
 	}
 
 	// Writer the body to file
-	_, err = io.Copy(out, resp.Body)
+	size, e := io.Copy(out, resp.Body)
 	if err != nil {
-		return err
+		return 0, e
 	}
 
-	return nil
+	return size, nil
 }

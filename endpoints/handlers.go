@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 
 	qsc "github.com/byuoitav/qsys-download/qscdownload"
 	"github.com/gin-gonic/gin"
@@ -35,8 +36,7 @@ func (d *DeviceManager) getBoxFolderID(context *gin.Context) (id string) {
 }
 
 func (d *DeviceManager) downloadFile(context *gin.Context) {
-	fmt.Println("downloadFile Top")
-
+	//Download from QSC
 	filename := context.Param("file")
 	downloadfilepath := context.PostForm("filePath")
 	storefilepath := "../tmp_audio/" + filename
@@ -47,37 +47,26 @@ func (d *DeviceManager) downloadFile(context *gin.Context) {
 		context.String(http.StatusOK, "Malformed query. URL should match https://api/v1/core IP address/download/file name.mp3. FilePath must be defined in form data as well.")
 	}
 
-	url := coreIP + "/api/v0/cores/self/media/" + downloadfilepath
+	url := "http://" + coreIP + "/api/v0/cores/self/media/" + downloadfilepath
 
-	d.Log.Debug("downloading file", zap.String("Storing file: ", storefilepath), zap.String("Core address: ", coreIP), zap.String("Download url: ", url))
-	fmt.Println(storefilepath, url)
+	d.Log.Debug("downloading file from Q-Sys ", zap.String("Storing file: ", storefilepath), zap.String("Core address: ", coreIP), zap.String("Download url: ", url))
+	//fmt.Println(storefilepath, url)
 
-	err := qsc.DownloadFile(storefilepath, url)
+	size, err := qsc.DownloadFile(storefilepath, url)
 	if err != nil {
-		d.Log.Warn("could not download file", zap.Error(err))
+		d.Log.Warn("could not download file from Q-Sys", zap.Error(err))
 		context.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
+	d.Log.Debug("Downloaded from Q-Sys " + strconv.FormatInt(int64(size), 10) + " Bytes")
 
-	context.JSON(http.StatusOK, 1)
-}
+	//Upload to Box
+	d.Log.Debug("Uploading to Box ")
 
-func (d *DeviceManager) getDownloadStatus(context *gin.Context) {
-	d.Log.Debug("downloading file", zap.String("file", context.Param("file")), zap.String("address", context.Param("address")))
-	//power := context.Param("file")
-	// if err != nil {
-	// 	d.Log.Warn("could not download file", zap.Error(err))
-	// 	context.JSON(http.StatusInternalServerError, err.Error())
-	// 	return
-	// }
+	token := d.getBoxAccessToken(context)
+	folderID := d.getBoxFolderID(context)
 
-	// err := actions.SetPower(context, context.Param("address"), power)
-	// if err != nil {
-	// 	d.Log.Warn("failed to set power", zap.Error(err))
-	// 	context.JSON(http.StatusInternalServerError, err.Error())
-	// 	return
-	//}
+	fmt.Println(token, folderID)
 
-	d.Log.Debug("successfully set power", zap.String("power", context.Param("power")), zap.String("address", context.Param("address")))
-	context.JSON(http.StatusOK, 1)
+	context.String(http.StatusOK, "Downloaded "+strconv.FormatInt(int64(size), 10)+" Bytes")
 }
