@@ -2,7 +2,7 @@ Microservice to download audio recordings from Q-Sys DSP's and upload them to Bo
 
 This microservice requires two files to be stored in ../ of the compiled code.  Namely, box_api_key.yourmom and box_folder_id.yourmom.  Their contents are a single lone of the api key and folder id from Box.
 
-The http put should be formatted: https://serverIP/api/v1/coreIP/download/fileName
+The http put should be formatted: https://serverIP:8013/api/v1/coreIP/download/fileName
 Content type needs to be "application/x-www-form-urlencoded"
 two key-value pairs are required: filePath and room
 
