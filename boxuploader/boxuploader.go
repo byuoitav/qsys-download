@@ -121,19 +121,29 @@ func UploadFile(filename string, localfilepath string, token string, folderID st
 	writer := multipart.NewWriter(payload)
 	_ = writer.WriteField("attributes", `{"name":"`+filename+`", "parent":{"id":"`+folderID+`"}}`)
 	file, errFile2 := os.Open(localfilepath)
-	defer file.Close()
-	part2,
-		errFile2 := writer.CreateFormFile("file", filepath.Base(localfilepath))
+	if errFile2 != nil {
+		fmt.Println(errFile2)
+		return false, errFile2
+	}
+
+	part2, errFile2 := writer.CreateFormFile("file", filepath.Base(localfilepath))
+	if errFile2 != nil {
+		fmt.Println(errFile2)
+		return false, errFile2
+	}
+
 	_, errFile2 = io.Copy(part2, file)
 	if errFile2 != nil {
 		fmt.Println(errFile2)
-		return false, err
+		return false, errFile2
 	}
+
 	err = writer.Close()
 	if err != nil {
 		fmt.Println(err)
 		return false, err
 	}
+	defer file.Close()
 
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, payload)
@@ -163,11 +173,10 @@ func UploadFile(filename string, localfilepath string, token string, folderID st
 	//todo error check validation
 	if errorCheck.TheType == "error" {
 		uploaded = false
-
 		return false, err
 	}
 
-	fmt.Println(string(body))
+	//fmt.Println(string(body))
 
 	uploaded = true
 	fmt.Println("boxuploader - UploadFile end")
