@@ -109,6 +109,7 @@ func CreateFolder(room string, token string, parentFolderID string) (folderID st
 
 	fmt.Println("boxuploader - CreateFolder end")
 	return folderID, nil
+	//todo update folder id from the JSON return body
 }
 
 func UploadFile(filename string, localfilepath string, token string, folderID string, parentFolderID string) (uploaded bool, err error) {
