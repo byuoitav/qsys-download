@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 
+	box "github.com/byuoitav/qsys-download/boxuploader"
 	qsc "github.com/byuoitav/qsys-download/qscdownload"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -39,8 +40,9 @@ func (d *DeviceManager) downloadFile(context *gin.Context) {
 	//Download from QSC
 	filename := context.Param("file")
 	downloadfilepath := context.PostForm("filePath")
-	storefilepath := "../tmp_audio/" + filename
+	localfilepath := "../tmp_audio/" + filename
 
+	room := context.PostForm("room")
 	coreIP := context.Param("address")
 
 	if filename == "" || downloadfilepath == "" || coreIP == "" {
@@ -49,10 +51,9 @@ func (d *DeviceManager) downloadFile(context *gin.Context) {
 
 	url := "http://" + coreIP + "/api/v0/cores/self/media/" + downloadfilepath
 
-	d.Log.Debug("downloading file from Q-Sys ", zap.String("Storing file: ", storefilepath), zap.String("Core address: ", coreIP), zap.String("Download url: ", url))
-	//fmt.Println(storefilepath, url)
+	d.Log.Debug("downloading file from Q-Sys ", zap.String("Storing file: ", localfilepath), zap.String("Core address: ", coreIP), zap.String("Download url: ", url))
 
-	size, err := qsc.DownloadFile(storefilepath, url)
+	size, err := qsc.DownloadFile(localfilepath, url)
 	if err != nil {
 		d.Log.Warn("could not download file from Q-Sys", zap.Error(err))
 		context.JSON(http.StatusInternalServerError, err.Error())
@@ -64,9 +65,39 @@ func (d *DeviceManager) downloadFile(context *gin.Context) {
 	d.Log.Debug("Uploading to Box ")
 
 	token := d.getBoxAccessToken(context)
-	folderID := d.getBoxFolderID(context)
+	parentFolderID := d.getBoxFolderID(context)
 
-	fmt.Println(token, folderID)
+	fmt.Println(token, parentFolderID)
+	var folderID string
+	folderID, err = box.CheckForFolder(room, token, parentFolderID)
+	if err != nil {
+		d.Log.Warn("box folder check failed: ", zap.Error(err))
+		context.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	if folderID == "" {
+		folderID, err = box.CreateFolder(room, token, parentFolderID)
+		if err != nil {
+			d.Log.Warn("box create folder failed: ", zap.Error(err))
+			context.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+	var uploaded bool
+	uploaded, err = box.UploadFile(filename, localfilepath, token, folderID, parentFolderID)
+	if err != nil {
+		d.Log.Warn("box upload file failed: ", zap.Error(err))
+		context.String(http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	context.String(http.StatusOK, "Downloaded "+strconv.FormatInt(int64(size), 10)+" Bytes")
+	if uploaded {
+		//delete local file
+		err = os.Remove(localfilepath)
+		if err != nil {
+			d.Log.Warn("file could not be deleted. file: "+localfilepath, zap.Error(err))
+			context.String(http.StatusInternalServerError, err.Error())
+		}
+	}
+	context.String(http.StatusOK, "Downloaded file from QSC and uploaded to Box successful. File size:  "+strconv.FormatInt(int64(size), 10)+" Bytes")
 }
