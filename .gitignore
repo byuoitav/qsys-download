@@ -4,6 +4,7 @@
 *.mp3
 *.wav
 *.aac
+*.cfg
 
 
 tmp_audio/*

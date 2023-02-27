@@ -13,11 +13,11 @@ import (
 )
 
 func (d *DeviceManager) getBoxAccessToken(context *gin.Context) (token string) {
-	f, err := os.ReadFile("../box_api_key.yourmom")
+	f, err := os.ReadFile("../box_api_key.cfg")
 	if err != nil {
-		d.Log.Warn("could not open box_api_key.yourmom", zap.Error(err))
+		d.Log.Warn("could not open box_api_key.cfg", zap.Error(err))
 		context.JSON(http.StatusInternalServerError, err.Error())
-		return
+		return ""
 	}
 	token = string(f)
 
@@ -25,11 +25,11 @@ func (d *DeviceManager) getBoxAccessToken(context *gin.Context) (token string) {
 }
 
 func (d *DeviceManager) getBoxFolderID(context *gin.Context) (id string) {
-	f, err := os.ReadFile("../box_folder_id.yourmom")
+	f, err := os.ReadFile("../box_folder_id.cfg")
 	if err != nil {
-		d.Log.Warn("could not open box_folder_id.yourmom", zap.Error(err))
+		d.Log.Warn("could not open box_folder_id.cfg", zap.Error(err))
 		context.JSON(http.StatusInternalServerError, err.Error())
-		return
+		return ""
 	}
 	id = string(f)
 
@@ -40,7 +40,7 @@ func (d *DeviceManager) downloadFile(context *gin.Context) {
 	//Download from QSC
 	filename := context.Param("file")
 	downloadfilepath := context.PostForm("filePath")
-	localfilepath := "../tmp_audio/" + filename
+	localfilepath := "tmp_audio/" + filename
 
 	room := context.PostForm("room")
 	coreIP := context.Param("address")
@@ -61,11 +61,20 @@ func (d *DeviceManager) downloadFile(context *gin.Context) {
 	}
 	d.Log.Debug("Downloaded from Q-Sys " + strconv.FormatInt(int64(size), 10) + " Bytes")
 
-	//Upload to Box
-	d.Log.Debug("Uploading to Box ")
-
+	//Get Box token and folder ID
+	d.Log.Debug("Reading Box Access Token and Folder ID ")
 	token := d.getBoxAccessToken(context)
 	parentFolderID := d.getBoxFolderID(context)
+
+	//if one of these files does not exist, do not do any of the Box stuff so this can be used without Box
+	//and just save to the local machine
+	if token == "" || parentFolderID == "" {
+		d.Log.Debug("Box token or parentFolderID not defined. File not uploaded and stored to tmp_audio")
+		return
+	}
+
+	//Upload to Box
+	d.Log.Debug("Uploading to Box ")
 
 	fmt.Println(token, parentFolderID)
 	var folderID string

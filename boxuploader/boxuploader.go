@@ -25,6 +25,8 @@ type BoxErrorCheck struct {
 	TheType string `json:"type`
 }
 
+//Todo: Check responses for authorization and return errors appropriately.
+
 func CheckForFolder(room string, token string, parentFolderID string) (folderID string, err error) {
 	fmt.Println("boxuploader - CheckForFolder start")
 
@@ -61,14 +63,10 @@ func CheckForFolder(room string, token string, parentFolderID string) (folderID 
 		}
 	}
 
-	fmt.Println("boxuploader - CheckForFolder end")
 	return folderID, nil
 }
 
 func CreateFolder(room string, token string, parentFolderID string) (folderID string, err error) {
-	fmt.Println("boxuploader - CreateFolder start")
-	fmt.Println("Room: ", room)
-
 	url := "https://api.box.com/2.0/folders"
 	method := "POST"
 
@@ -79,9 +77,6 @@ func CreateFolder(room string, token string, parentFolderID string) (folderID st
 	  ` + name + `,
 	  ` + parent + `
 	  	}`)
-
-	fmt.Println("PAYLOAD")
-	fmt.Println(payload)
 
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, payload)
@@ -105,15 +100,22 @@ func CreateFolder(room string, token string, parentFolderID string) (folderID st
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(string(body))
 
-	fmt.Println("boxuploader - CreateFolder end")
+	//Update folder id from the JSON return body
+	fmt.Println("***************************************")
+	var errorCheck Entries
+	err = json.Unmarshal(body, &errorCheck)
+	//error response validation
+	if errorCheck.ID == "error" {
+		return "", err
+	}
+	fmt.Println(errorCheck.ID)
+
+	folderID = errorCheck.ID
 	return folderID, nil
-	//todo update folder id from the JSON return body
 }
 
 func UploadFile(filename string, localfilepath string, token string, folderID string, parentFolderID string) (uploaded bool, err error) {
-	fmt.Println("boxuploader - UploadFile start")
 
 	url := "https://upload.box.com/api/2.0/files/content"
 	method := "POST"
@@ -169,18 +171,14 @@ func UploadFile(filename string, localfilepath string, token string, folderID st
 		return false, err
 	}
 
+	uploaded = true
 	var errorCheck BoxErrorCheck
 	err = json.Unmarshal(body, &errorCheck)
-	//todo error check validation
+	//error response validation
 	if errorCheck.TheType == "error" {
 		uploaded = false
 		return false, err
 	}
-
-	//fmt.Println(string(body))
-
-	uploaded = true
-	fmt.Println("boxuploader - UploadFile end")
 
 	return uploaded, nil
 }
