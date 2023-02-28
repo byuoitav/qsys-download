@@ -13,7 +13,7 @@ import (
 )
 
 func (d *DeviceManager) getBoxAccessToken(context *gin.Context) (token string) {
-	f, err := os.ReadFile("../box_api_key.cfg")
+	f, err := os.ReadFile("config/box_api_key.cfg")
 	if err != nil {
 		d.Log.Warn("could not open box_api_key.cfg", zap.Error(err))
 		context.JSON(http.StatusInternalServerError, err.Error())
@@ -25,7 +25,7 @@ func (d *DeviceManager) getBoxAccessToken(context *gin.Context) (token string) {
 }
 
 func (d *DeviceManager) getBoxFolderID(context *gin.Context) (id string) {
-	f, err := os.ReadFile("../box_folder_id.cfg")
+	f, err := os.ReadFile("config/box_folder_id.cfg")
 	if err != nil {
 		d.Log.Warn("could not open box_folder_id.cfg", zap.Error(err))
 		context.JSON(http.StatusInternalServerError, err.Error())

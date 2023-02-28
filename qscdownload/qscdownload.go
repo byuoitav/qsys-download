@@ -111,7 +111,7 @@ func logout(coreIP string, token string) (err error) {
 }
 
 func getCredentials() (credentials Login) {
-	f, err := os.ReadFile("../qsc_login.cfg")
+	f, err := os.ReadFile("config/qsc_login.cfg")
 	if err != nil {
 		fmt.Println("Error openiong qsc_login.cfg. Proceeding without QSC login credentials")
 		return
