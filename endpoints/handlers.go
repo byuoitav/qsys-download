@@ -49,11 +49,9 @@ func (d *DeviceManager) downloadFile(context *gin.Context) {
 		context.String(http.StatusOK, "Malformed query. URL should match https://api/v1/core IP address/download/file name.mp3. FilePath must be defined in form data as well.")
 	}
 
-	url := "http://" + coreIP + "/api/v0/cores/self/media/" + downloadfilepath
+	d.Log.Debug("downloading file from Q-Sys ", zap.String("Storing file: ", localfilepath), zap.String("Core address: ", coreIP), zap.String("Download url: ", downloadfilepath))
 
-	d.Log.Debug("downloading file from Q-Sys ", zap.String("Storing file: ", localfilepath), zap.String("Core address: ", coreIP), zap.String("Download url: ", url))
-
-	size, err := qsc.DownloadFile(localfilepath, url)
+	size, err := qsc.DownloadFile(localfilepath, coreIP, downloadfilepath)
 	if err != nil {
 		d.Log.Warn("could not download file from Q-Sys", zap.Error(err))
 		context.JSON(http.StatusInternalServerError, err.Error())

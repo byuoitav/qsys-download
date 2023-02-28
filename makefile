@@ -1,6 +1,6 @@
-NAME := clevertouch-control
+NAME := qsys-download
 OWNER := byuoitav
-REPO := clevertouch-control
+REPO := qsys-download
 PKG := github.com/$(OWNER)/$(REPO)
 DOCKER_URL := docker.pkg.github.com
 

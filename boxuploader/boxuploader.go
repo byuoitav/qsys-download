@@ -22,7 +22,7 @@ type Entries struct {
 }
 
 type BoxErrorCheck struct {
-	TheType string `json:"type`
+	TheType string `json:"type"`
 }
 
 //Todo: Check responses for authorization and return errors appropriately.
@@ -82,7 +82,7 @@ func CreateFolder(room string, token string, parentFolderID string) (folderID st
 	req, err := http.NewRequest(method, url, payload)
 
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
 		return
 	}
 	req.Header.Add("Authorization", "Bearer "+token)
@@ -90,26 +90,24 @@ func CreateFolder(room string, token string, parentFolderID string) (folderID st
 
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
 		return
 	}
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
 		return
 	}
 
 	//Update folder id from the JSON return body
-	fmt.Println("***************************************")
 	var errorCheck Entries
 	err = json.Unmarshal(body, &errorCheck)
 	//error response validation
 	if errorCheck.ID == "error" {
 		return "", err
 	}
-	fmt.Println(errorCheck.ID)
 
 	folderID = errorCheck.ID
 	return folderID, nil

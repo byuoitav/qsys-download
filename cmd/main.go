@@ -38,14 +38,3 @@ func main() {
 
 	manager.RunHTTPServer(router, port)
 }
-
-// func test() {
-
-// 	filename := "DefLeppardPourSomeSugarOnMelyrics.mp3"
-// 	filepath := "tmp_audio/" + filename
-
-// 	coreIP := "10.5.34.167"
-// 	url := coreIP + "/api/v0/cores/self/media/Audio/" + filename
-
-// 	downloadFile(filepath, url)
-// }
